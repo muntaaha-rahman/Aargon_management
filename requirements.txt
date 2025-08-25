@@ -1,0 +1,19 @@
+fastapi                        # API framework
+uvicorn[standard]              # ASGI server
+python-dotenv                  # Environment variable loader
+SQLAlchemy                     # ORM
+asyncpg                        # Async PostgreSQL driver
+alembic                        # DB migrations
+pydantic                       # Data validation
+pydantic-settings
+pydantic[email]
+
+python-jose[cryptography]      # JWT
+passlib[bcrypt]                # Password hashing
+
+psycopg2-binary                #driver mandatory for db connections
+httpx                          # Async HTTP client (API calls)
+redis                          # Caching, pub/sub
+pandas
+matplotlib
+python-multipart               # File uploads
