@@ -1,6 +1,12 @@
-from sqlalchemy import Column, Integer, String, DateTime, func, Enum
+from sqlalchemy import (
+    Column, String, Integer, Enum, ForeignKey, Date, Text, DateTime, Boolean
+)
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from sqlalchemy.ext.declarative import declarative_base
 import enum
-from app.core.database import Base
+
+Base = declarative_base()
 
 class UserRole(str, enum.Enum):
     superadmin = "superadmin"
