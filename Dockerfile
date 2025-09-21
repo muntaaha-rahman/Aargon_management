@@ -1,26 +1,16 @@
-# Use official Python image
 FROM python:3.10-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy only requirements first for caching
-COPY requirements.txt /app/
-
-# Install dependencies
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all project files
-COPY . /app/
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client && rm -rf /var/lib/apt/lists/*
 
-# Make start.sh executable
-RUN chmod +x /app/start.sh
+COPY . .
 
-# Expose FastAPI port
+RUN chmod +x start.sh
+
 EXPOSE 8000
 
-
-RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
-
-# Use start.sh to run the app
-CMD ["sh", "/app/start.sh"]
+CMD ["sh", "start.sh"]

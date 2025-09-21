@@ -1,11 +1,11 @@
 # app/main.py
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 from fastapi.openapi.utils import get_openapi
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.auth import routes as auth_routes
-
 
 # Lifespan context for startup/shutdown tasks
 @asynccontextmanager
@@ -16,7 +16,6 @@ async def lifespan(app: FastAPI):
     yield
     print("Shutting down...")
 
-
 app = FastAPI(
     lifespan=lifespan,
     title="School Management System for Autistic Students",
@@ -25,7 +24,6 @@ app = FastAPI(
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json"
 )
-
 
 # Custom OpenAPI with BearerAuth for JWT
 def custom_openapi():
@@ -47,15 +45,17 @@ def custom_openapi():
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
-
 app.openapi = custom_openapi
-
 
 # Include API routers
 app.include_router(auth_routes.router, prefix="/api/v1/auth", tags=["Auth"])
-
 
 # Root endpoint
 @app.get("/", tags=["Root"])
 def root():
     return {"message": "Welcome to the School Management API for Autistic Students!"}
+
+# Health check endpoint
+@app.get("/health", tags=["Health"])
+async def health_check(db: AsyncSession = Depends(get_db)):
+    return {"status": "healthy", "database": "connected"}
