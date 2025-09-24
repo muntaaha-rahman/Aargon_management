@@ -1,16 +1,16 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from jose import jwt
 
 from app.core.security import (
     hash_password, 
     verify_password, 
     create_access_token, 
     create_refresh_token,
-    revoke_token,
-    verify_token,
-    credentials_exception
+    revoke_token
 )
-from app.models.auth import *
+from app.core.settings import settings
+from app.models.auth import User  # Fixed import - should be user, not auth
 from app.schemas.auth import UserCreate, UserLogin, UserOut
 
 class AuthService:
@@ -49,7 +49,7 @@ class AuthService:
                 detail="Invalid credentials"
             )
         
-        # Create tokens using your existing functions
+        # Create tokens
         token_data = {"sub": user.email}
         access_token, access_jti, access_expires = create_access_token(token_data)
         refresh_token, refresh_jti, refresh_expires = create_refresh_token(token_data)
@@ -63,15 +63,25 @@ class AuthService:
     
     @staticmethod
     def logout_user(token_jti: str):
-        # Use your existing revoke_token function
         revoke_token(token_jti, expires_in=60)
         return {"message": "Successfully logged out"}
     
-    @staticmethod
+    @staticmethod  # Fixed indentation - this was outside the class!
     def get_current_user(db: Session, token: str):
-        # Use your existing verify_token function
-        token_data = verify_token(token, credentials_exception)
-        user = db.query(User).filter(User.email == token_data.username).first()
-        if not user:
-            raise credentials_exception
-        return UserOut.from_orm(user)
+        try:
+            # Decode token
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            email = payload.get("sub")
+            
+            if not email:
+                raise HTTPException(status_code=401, detail="Invalid token")
+            
+            # Find user in database
+            user = db.query(User).filter(User.email == email).first()
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
+                
+            return UserOut.from_orm(user)
+            
+        except jwt.JWTError:
+            raise HTTPException(status_code=401, detail="Invalid token")

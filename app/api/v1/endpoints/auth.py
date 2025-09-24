@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from jose import jwt
 
 from app.core.database import get_db
-from app.core.security import get_current_user, oauth2_scheme
+from app.core.security import oauth2_scheme
+from app.core.settings import settings
 from app.schemas.auth import UserCreate, UserLogin
 from app.services.auth import AuthService
 
@@ -18,9 +20,6 @@ async def login(login_data: UserLogin, db: Session = Depends(get_db)):
 
 @router.post("/logout")
 async def logout(token: str = Depends(oauth2_scheme)):
-    from jose import jwt
-    from app.core.settings import settings
-    
     payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
     jti = payload.get("jti")
     
@@ -31,8 +30,8 @@ async def logout(token: str = Depends(oauth2_scheme)):
 
 @router.get("/me")
 async def get_current_user_info(
-    current_user = Depends(get_current_user), 
+    token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ):
-    user_info = AuthService.get_current_user(db, current_user.username)
+    user_info = AuthService.get_current_user(db, token)
     return {"user": user_info}
