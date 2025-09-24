@@ -5,14 +5,12 @@ from fastapi.openapi.utils import get_openapi
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.auth import routes as auth_routes
+from app.api.v1.endpoints import auth  # Fixed import
 
 # Lifespan context for startup/shutdown tasks
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Running startup tasks...")
-    # If you have a create_db_and_tables function, uncomment below
-    # create_db_and_tables()
     yield
     print("Shutting down...")
 
@@ -47,8 +45,8 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
-# Include API routers
-app.include_router(auth_routes.router, prefix="/api/v1/auth", tags=["Auth"])
+# Include API routers - Fixed this line
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 
 # Root endpoint
 @app.get("/", tags=["Root"])

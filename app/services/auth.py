@@ -10,7 +10,7 @@ from app.core.security import (
     verify_token,
     credentials_exception
 )
-from app.models.user import User
+from app.models.auth import *
 from app.schemas.auth import UserCreate, UserLogin, UserOut
 
 class AuthService:

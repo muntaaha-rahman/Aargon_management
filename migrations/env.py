@@ -9,7 +9,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from app.core.config import Base
-from app.models.user import User  # Import all models
+from app.models.auth import *  # Import all models
 
 config = context.config
 
