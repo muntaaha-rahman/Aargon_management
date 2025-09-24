@@ -1,59 +1,35 @@
 # app/main.py
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from fastapi.openapi.utils import get_openapi
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import get_db
-from app.api.v1.endpoints import auth  # Fixed import
+from app.api.v1.endpoints import api_router
 
-# Lifespan context for startup/shutdown tasks
+# Lifespan context
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Running startup tasks...")
+    print("Starting up...")
     yield
     print("Shutting down...")
 
+# Create FastAPI app
 app = FastAPI(
     lifespan=lifespan,
-    title="School Management System for Autistic Students",
+    title="School Management System",
     version="1.0",
     docs_url="/api/docs",
-    redoc_url="/api/redoc",
+    redoc_url="/api/redoc", 
     openapi_url="/api/openapi.json"
 )
 
-# Custom OpenAPI with BearerAuth for JWT
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-
-    openapi_schema = get_openapi(
-        title=app.title,
-        version=app.version,
-        routes=app.routes,
-    )
-    openapi_schema["components"]["securitySchemes"] = {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT"
-        }
-    }
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-app.openapi = custom_openapi
-
-# Include API routers - Fixed this line
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
+# Include API routers
+app.include_router(api_router, prefix="/api/v1", tags=["API v1"])
 
 # Root endpoint
-@app.get("/", tags=["Root"])
+@app.get("/")
 def root():
-    return {"message": "Welcome to the School Management API for Autistic Students!"}
+    return {"message": "School Management API is running!"}
 
-# Health check endpoint
-@app.get("/health", tags=["Health"])
-async def health_check(db: AsyncSession = Depends(get_db)):
-    return {"status": "healthy", "database": "connected"}
+# Health check
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
