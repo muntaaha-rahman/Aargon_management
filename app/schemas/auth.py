@@ -16,7 +16,7 @@ class UserCreate(BaseModel):
     full_name: str
     email: EmailStr
     password: str
-    role: str
+    role: UserRole = UserRole.manager
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -27,4 +27,4 @@ class UserOut(UserBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True  # Pydantic v2
