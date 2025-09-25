@@ -1,5 +1,6 @@
 # app/main.py
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from fastapi.openapi.utils import get_openapi
 
@@ -19,13 +20,20 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     lifespan=lifespan,
-    title="School Management System for Autistic Students",
+    title="Aargon Management",
     version="1.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     openapi_url="/api/openapi.json"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Your Vite dev server
+    allow_credentials=True,
+    allow_methods=["*"],  # This includes OPTIONS
+    allow_headers=["*"],
+)
 
 # Custom OpenAPI with BearerAuth for JWT
 def custom_openapi():
