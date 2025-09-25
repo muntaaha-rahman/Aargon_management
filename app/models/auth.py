@@ -12,6 +12,7 @@ class UserRole(str, enum.Enum):
     superadmin = "superadmin"
     admin = "admin"
     manager = "manager"
+    client = "client"
 
 class User(Base):
     __tablename__ = "users"
@@ -21,4 +22,5 @@ class User(Base):
     email = Column(String(100), unique=True, index=True, nullable=False)
     password = Column(String(255), nullable=False)  # hashed
     role = Column(Enum(UserRole), nullable=False, default=UserRole.manager)
+    active = Column(Boolean, nullable=True, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
