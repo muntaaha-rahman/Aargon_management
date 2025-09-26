@@ -23,4 +23,6 @@ class User(Base):
     password = Column(String(255), nullable=False)  # hashed
     role = Column(Enum(UserRole), nullable=False, default=UserRole.manager)
     active = Column(Boolean, nullable=True, default=True)
+    contact_person = Column(String(100), nullable=True)
+    phone = Column(String(20), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -15,9 +15,11 @@ class ClientService:
         client = User(
             name=client_data.name,
             email=client_data.email,
-            password=client_data.password,
+            password=client_data.password,  # Make sure to hash this password
             role=UserRole.client,
-            active=True
+            active=True,
+            contact_person=client_data.contact_person,
+            phone=client_data.phone
         )
         db.add(client)
         db.commit()
