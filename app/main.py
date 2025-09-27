@@ -7,6 +7,7 @@ from fastapi.openapi.utils import get_openapi
 from app.core.database import get_db
 from app.api.v1.endpoints import auth
 from app.api.v1.endpoints import clients
+from app.api.v1.endpoints import services
 
 
 # Lifespan context for startup/shutdown tasks
@@ -63,6 +64,7 @@ app.openapi = custom_openapi
 # Include API routers
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(clients.router, prefix="/api/v1", tags=["Clients"])
+app.include_router(services.router, prefix="/api/v1", tags=["Services"])
 
 
 # Root endpoint

@@ -3,10 +3,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declarative_base
 import enum
 
-Base = declarative_base()
+from app.models.base import Base
 
 class UserRole(str, enum.Enum):
     superadmin = "superadmin"
