@@ -39,13 +39,15 @@ class ServiceAssignmentUpdate(BaseModel):
     description: Optional[str] = None
     link_capacity: Optional[str] = None
     rate: Optional[float] = None
+    service_stop_date: Optional[date] = None
 
 class ServiceAssignmentResponse(BaseModel):
     id: int
-    client_id: int  # Keep as ID
-    service_id: int  # Keep as ID
+    client_id: int
+    service_id: int
     service_start_month: date
     billing_start_date: date
+    service_stop_date: Optional[date] = None
     status: bool
     description: str
     link_capacity: str

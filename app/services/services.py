@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from datetime import datetime
 from app.models.services import Service, ServiceAssignment
 from app.models.auth import User
 
@@ -12,7 +13,7 @@ class ServiceService:
         
         service = Service(
             name=service_data.name,
-            created_by=current_user.username,  
+            created_by=current_user.username,
             active=True
         )
         db.add(service)
@@ -83,7 +84,7 @@ class ServiceAssignmentService:
             link_capacity=assignment_data.link_capacity,
             rate=assignment_data.rate,
             status=True,
-            created_by=current_user.username  
+            created_by=current_user.username
         )
         
         db.add(assignment)
@@ -106,6 +107,11 @@ class ServiceAssignmentService:
             raise HTTPException(status_code=404, detail="Service assignment not found")
         
         assignment.status = status
+        
+        # Set service_stop_date when stopping the service
+        if status == False and assignment.service_stop_date is None:
+            assignment.service_stop_date = datetime.now().date()
+        
         db.commit()
         db.refresh(assignment)
         return assignment

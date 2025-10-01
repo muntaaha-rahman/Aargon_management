@@ -13,7 +13,34 @@ from app.services.services import ServiceService, ServiceAssignmentService
 
 router = APIRouter(prefix="/services", tags=["services"])
 
-# Service Endpoints
+# Service Assignment Endpoints (PUT THESE FIRST - STATIC PATHS)
+@router.get("/assignments", response_model=List[ServiceAssignmentResponse])
+def get_service_assignments(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return ServiceAssignmentService.get_service_assignments(db, skip, limit)
+
+@router.post("/assignments", response_model=ServiceAssignmentResponse)
+def create_service_assignment(
+    assignment_data: ServiceAssignmentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return ServiceAssignmentService.create_service_assignment(db, assignment_data, current_user)
+
+@router.patch("/assignments/{assignment_id}/status", response_model=ServiceAssignmentResponse)
+def update_service_assignment_status(
+    assignment_id: int,
+    status_data: ServiceAssignmentUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return ServiceAssignmentService.update_service_assignment_status(db, assignment_id, status_data.status, current_user)
+
+# Service Endpoints (PUT THESE AFTER - DYNAMIC PATHS)
 @router.post("/", response_model=ServiceResponse)
 def create_service(
     service_data: ServiceCreate,
@@ -67,30 +94,3 @@ def update_service_active(
     current_user: User = Depends(get_current_user)
 ):
     return ServiceService.update_service_active(db, service_id, active_data.active, current_user)
-
-# Service Assignment Endpoints
-@router.post("/assignments", response_model=ServiceAssignmentResponse)
-def create_service_assignment(
-    assignment_data: ServiceAssignmentCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    return ServiceAssignmentService.create_service_assignment(db, assignment_data, current_user)
-
-@router.get("/assignments", response_model=List[ServiceAssignmentResponse])
-def get_service_assignments(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    return ServiceAssignmentService.get_service_assignments(db, skip, limit)
-
-@router.patch("/assignments/{assignment_id}/status", response_model=ServiceAssignmentResponse)
-def update_service_assignment_status(
-    assignment_id: int,
-    status_data: ServiceAssignmentUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    return ServiceAssignmentService.update_service_assignment_status(db, assignment_id, status_data.status, current_user)
