@@ -5,11 +5,15 @@ from typing import List
 from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.auth import User
-from app.schemas.services import ServiceCreate, ServiceResponse, ServiceUpdate, ServiceActiveUpdate
-from app.services.services import ServiceService
+from app.schemas.services import (
+    ServiceCreate, ServiceResponse, ServiceUpdate, ServiceActiveUpdate,
+    ServiceAssignmentCreate, ServiceAssignmentResponse, ServiceAssignmentUpdate
+)
+from app.services.services import ServiceService, ServiceAssignmentService
 
 router = APIRouter(prefix="/services", tags=["services"])
 
+# Service Endpoints
 @router.post("/", response_model=ServiceResponse)
 def create_service(
     service_data: ServiceCreate,
@@ -63,3 +67,30 @@ def update_service_active(
     current_user: User = Depends(get_current_user)
 ):
     return ServiceService.update_service_active(db, service_id, active_data.active, current_user)
+
+# Service Assignment Endpoints
+@router.post("/assignments", response_model=ServiceAssignmentResponse)
+def create_service_assignment(
+    assignment_data: ServiceAssignmentCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return ServiceAssignmentService.create_service_assignment(db, assignment_data, current_user)
+
+@router.get("/assignments", response_model=List[ServiceAssignmentResponse])
+def get_service_assignments(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return ServiceAssignmentService.get_service_assignments(db, skip, limit)
+
+@router.patch("/assignments/{assignment_id}/status", response_model=ServiceAssignmentResponse)
+def update_service_assignment_status(
+    assignment_id: int,
+    status_data: ServiceAssignmentUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return ServiceAssignmentService.update_service_assignment_status(db, assignment_id, status_data.status, current_user)

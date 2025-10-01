@@ -1,19 +1,18 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from app.models.services import Service
+from app.models.services import Service, ServiceAssignment
 from app.models.auth import User
 
 class ServiceService:
     @staticmethod
     def create_service(db: Session, service_data, current_user: User):
-        # Check if service name already exists
         existing_service = db.query(Service).filter(Service.name == service_data.name).first()
         if existing_service:
             raise HTTPException(status_code=400, detail="Service name already exists")
         
         service = Service(
             name=service_data.name,
-            created_by=current_user.username,
+            created_by=current_user.username,  
             active=True
         )
         db.add(service)
@@ -36,7 +35,6 @@ class ServiceService:
             raise HTTPException(status_code=404, detail="Service not found")
         
         if service_data.name is not None:
-            # Check if new name already exists (excluding current service)
             existing_service = db.query(Service).filter(
                 Service.name == service_data.name, 
                 Service.id != service_id
@@ -72,3 +70,42 @@ class ServiceService:
         db.commit()
         db.refresh(service)
         return service
+
+class ServiceAssignmentService:
+    @staticmethod
+    def create_service_assignment(db: Session, assignment_data, current_user: User):
+        assignment = ServiceAssignment(
+            client_id=assignment_data.client_id,
+            service_id=assignment_data.service_id,
+            service_start_month=assignment_data.service_start_month,
+            billing_start_date=assignment_data.billing_start_date,
+            description=assignment_data.description,
+            link_capacity=assignment_data.link_capacity,
+            rate=assignment_data.rate,
+            status=True,
+            created_by=current_user.username  
+        )
+        
+        db.add(assignment)
+        db.commit()
+        db.refresh(assignment)
+        return assignment
+
+    @staticmethod
+    def get_service_assignments(db: Session, skip: int = 0, limit: int = 100):
+        return db.query(ServiceAssignment).offset(skip).limit(limit).all()
+
+    @staticmethod
+    def get_service_assignment_by_id(db: Session, assignment_id: int):
+        return db.query(ServiceAssignment).filter(ServiceAssignment.id == assignment_id).first()
+
+    @staticmethod
+    def update_service_assignment_status(db: Session, assignment_id: int, status: bool, current_user: User):
+        assignment = db.query(ServiceAssignment).filter(ServiceAssignment.id == assignment_id).first()
+        if not assignment:
+            raise HTTPException(status_code=404, detail="Service assignment not found")
+        
+        assignment.status = status
+        db.commit()
+        db.refresh(assignment)
+        return assignment

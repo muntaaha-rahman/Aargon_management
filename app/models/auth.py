@@ -25,3 +25,5 @@ class User(Base):
     contact_person = Column(String(100), nullable=True)
     phone = Column(String(20), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    service_assignments = relationship("ServiceAssignment", back_populates="client")
