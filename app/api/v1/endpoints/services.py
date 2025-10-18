@@ -7,7 +7,8 @@ from app.core.security import get_current_user
 from app.models.auth import User
 from app.schemas.services import (
     ServiceCreate, ServiceResponse, ServiceUpdate, ServiceActiveUpdate,
-    ServiceAssignmentCreate, ServiceAssignmentResponse, ServiceAssignmentUpdate
+    ServiceAssignmentCreate, ServiceAssignmentResponse, ServiceAssignmentUpdate,
+    InvoicePreviewRequest, InvoicePreviewResponse
 )
 from app.services.services import ServiceService, ServiceAssignmentService
 
@@ -94,3 +95,14 @@ def update_service_active(
     current_user: User = Depends(get_current_user)
 ):
     return ServiceService.update_service_active(db, service_id, active_data.active, current_user)
+
+
+@router.post("/assignments/preview", response_model=InvoicePreviewResponse)
+def get_invoice_preview(
+    preview_data: InvoicePreviewRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return ServiceAssignmentService.get_invoice_preview_for_client(
+        db, preview_data.client_id, preview_data.months
+    )

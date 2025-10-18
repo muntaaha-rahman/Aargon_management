@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from datetime import datetime
+from datetime import date, datetime
+from calendar import monthrange
 from app.models.services import Service, ServiceAssignment
 from app.models.auth import User
 
@@ -115,3 +116,83 @@ class ServiceAssignmentService:
         db.commit()
         db.refresh(assignment)
         return assignment
+    
+    @staticmethod
+    def get_invoice_preview_for_client(db: Session, client_id: int, months: list[date]):
+        """
+        Returns all active assignments for the given client for the selected months,
+        with prorated rate computation based on billing_start_date.
+        """
+        from datetime import date
+
+        assignments = (
+            db.query(ServiceAssignment)
+            .filter(ServiceAssignment.client_id == client_id)
+            .all()
+        )
+
+        result = []
+
+        for m in months:
+            year, month = m.year, m.month
+            days_in_month = monthrange(year, month)[1]
+            month_start = date(year, month, 1)
+            month_end = date(year, month, days_in_month)
+
+            services = []
+
+            for a in assignments:
+                # Skip inactive or out-of-range assignments
+                if not a.status:
+                    continue
+                if a.service_start_month > month_start:
+                    continue
+                if a.service_stop_date and a.service_stop_date < month_start:
+                    continue
+
+                # Determine billing start day for this assignment
+                billing_day = a.billing_start_date.day
+
+                # Compute prorated days
+                if billing_day <= 1:
+                    prorated_days = days_in_month
+                elif billing_day > days_in_month:
+                    prorated_days = 0
+                else:
+                    prorated_days = days_in_month - (billing_day - 1)
+
+                # Compute prorated amount
+                prorated_amount = 0.0
+                if a.rate and prorated_days > 0:
+                    prorated_amount = float(a.rate * prorated_days / days_in_month)
+
+                # Compose result item
+                services.append({
+                    "assignment_id": a.id,
+                    "service_id": a.service_id,
+                    "service_name": a.service.name if a.service else "",
+                    "description": a.description,
+                    "link_capacity": a.link_capacity,
+                    "rate": a.rate,
+                    "billing_start_date": a.billing_start_date,
+                    "service_start_month": a.service_start_month,
+                    "service_stop_date": a.service_stop_date,
+                    "status": a.status,
+                    "prorated_days": prorated_days,
+                    "prorated_amount": round(prorated_amount, 2)
+                })
+
+            # Format response month
+            month_label = m.strftime("%B %Y")
+
+            result.append({
+                "month": month_start,
+                "label": month_label,
+                "days_in_month": days_in_month,
+                "services": services
+            })
+
+        return {
+            "client_id": client_id,
+            "months": result
+        }

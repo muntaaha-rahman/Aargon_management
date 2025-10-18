@@ -58,3 +58,36 @@ class ServiceAssignmentResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+
+class InvoicePreviewRequest(BaseModel):
+    client_id: int
+    months: List[date]
+
+
+class InvoicePreviewServiceItem(BaseModel):
+    assignment_id: int
+    service_id: int
+    service_name: str
+    description: str
+    link_capacity: str
+    rate: Optional[float]
+    billing_start_date: date
+    service_start_month: date
+    service_stop_date: Optional[date]
+    status: bool
+    prorated_days: int
+    prorated_amount: float
+
+
+class InvoicePreviewMonth(BaseModel):
+    month: date
+    label: str
+    days_in_month: int
+    services: List[InvoicePreviewServiceItem]
+
+
+class InvoicePreviewResponse(BaseModel):
+    client_id: int
+    months: List[InvoicePreviewMonth]
