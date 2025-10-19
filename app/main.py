@@ -8,6 +8,7 @@ from app.core.database import get_db
 from app.api.v1.endpoints import auth
 from app.api.v1.endpoints import clients
 from app.api.v1.endpoints import services
+from app.api.v1.endpoints import invoice_router as invoice
 
 
 # Lifespan context for startup/shutdown tasks
@@ -65,6 +66,7 @@ app.openapi = custom_openapi
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Auth"])
 app.include_router(clients.router, prefix="/api/v1", tags=["Clients"])
 app.include_router(services.router, prefix="/api/v1", tags=["Services"])
+app.include_router(invoice.router, prefix="/api/v1", tags=["Invoices"])
 
 
 # Root endpoint

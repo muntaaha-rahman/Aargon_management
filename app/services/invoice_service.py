@@ -1,38 +1,26 @@
-from sqlalchemy.orm import Session
+from app.models.invoice import Invoice
+from app.utils.invoice_pdf import generate_invoice_pdf
+from app.db.session import SessionLocal
 from datetime import date
-from models.invoice import Invoice
-from schemas.invoice import InvoiceCreate
+import uuid
 
-def generate_invoice_number(db: Session) -> str:
-    """Generates a unique invoice number like INV-20251019-001"""
-    today_str = date.today().strftime("%Y%m%d")
-    count_today = db.query(Invoice).filter(Invoice.created_date == date.today()).count() + 1
-    return f"INV-{today_str}-{count_today:03d}"
+def create_invoice(db, client_id: int, client_name: str, client_address: str, months: str):
+    # Generate unique invoice number
+    invoice_number = f"INV-{uuid.uuid4().hex[:8].upper()}"  # e.g., INV-1A2B3C4D
 
+    # Generate PDF
+    file_path = generate_invoice_pdf(invoice_number, client_name, client_address, months)
 
-def create_invoice(db: Session, invoice_data: InvoiceCreate):
-    """Create a new invoice and auto-generate invoice number"""
-    invoice_number = generate_invoice_number(db)
-
+    # Save to DB
     new_invoice = Invoice(
-        client_id=invoice_data.client_id,
-        months=invoice_data.months,
-        file_path=invoice_data.file_path,
         invoice_number=invoice_number,
-        created_date=date.today()
+        client_id=client_id,
+        months=months,
+        created_date=date.today(),
+        file_path=file_path
     )
-
     db.add(new_invoice)
     db.commit()
     db.refresh(new_invoice)
+
     return new_invoice
-
-
-def get_invoices(db: Session):
-    """Fetch all invoices"""
-    return db.query(Invoice).order_by(Invoice.created_date.desc()).all()
-
-
-def get_invoice_by_id(db: Session, invoice_id: int):
-    """Fetch single invoice by ID"""
-    return db.query(Invoice).filter(Invoice.id == invoice_id).first()
