@@ -27,3 +27,4 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     service_assignments = relationship("ServiceAssignment", back_populates="client")
+    invoices = relationship("Invoice", back_populates="client", cascade="all, delete-orphan")
