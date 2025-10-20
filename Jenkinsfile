@@ -12,13 +12,13 @@ pipeline {
             steps {
                 git branch: 'main', 
                 url: 'https://github.com/muntaaha-rahman/Aargon_management.git',
-                credentialsId: 'your-github-credentials'
+                credentialsId: 'github-aargon-token'
             }
         }
         
         stage('Deploy to Server') {
             steps {
-                sshagent(['your-ssh-credentials']) {
+                sshagent(['aargon-server-key']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${REMOTE_HOST} '
                             cd ${PROJECT_PATH}
