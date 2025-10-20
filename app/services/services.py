@@ -150,7 +150,7 @@ class ServiceAssignmentService:
                 if a.service_stop_date and a.service_stop_date < month_start:
                     continue
 
-                if a.billing_start_date > month_end:
+                if a.billing_start_date > month_end or a.billing_start_date < month_start:
                     continue
 
                 # Determine billing start day for this assignment
