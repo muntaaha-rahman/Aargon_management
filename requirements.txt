@@ -17,3 +17,5 @@ redis                          # Caching, pub/sub
 pandas
 matplotlib
 python-multipart               # File uploads
+bcrypt==3.2.0
+reportlab
