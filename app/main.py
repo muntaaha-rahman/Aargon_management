@@ -72,4 +72,4 @@ app.include_router(invoice.router, prefix="/api/v1", tags=["Invoices"])
 # Root endpoint
 @app.get("/", tags=["Root"])
 def root():
-    return {"message": "Welcome to the Aargon"}
+    return {"message": "Welcome to the Aargon Management"}
