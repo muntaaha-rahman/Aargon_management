@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from fastapi.openapi.utils import get_openapi
-import os
 
 from app.core.database import get_db
 from app.api.v1.endpoints import auth
@@ -15,8 +14,6 @@ from app.api.v1.endpoints import invoice_router as invoice
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Running startup tasks...")
-    # If you have a create_db_and_tables function, uncomment below
-    # create_db_and_tables()
     yield
     print("Shutting down...")
 
@@ -29,25 +26,14 @@ app = FastAPI(
     openapi_url="/api/openapi.json"
 )
 
-# Environment-based CORS configuration
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
-
-if ENVIRONMENT == "development":
-    allow_origins = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173", 
-        "http://10.220.220.100:5173",
-        "http://10.220.220.100:8000",
-    ]
-else:
-    allow_origins = [
-        "http://10.220.220.100",
-        "https://your-production-domain.com",
-    ]
-
+# Correct CORS configuration for your setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allow_origins,
+    allow_origins=[
+        "http://10.220.220.100",      # Your production frontend (port 80)
+        "http://localhost:5173",      # Vite dev server
+        "http://127.0.0.1:5173",      # Local development
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
