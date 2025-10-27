@@ -28,3 +28,4 @@ class User(Base):
 
     service_assignments = relationship("ServiceAssignment", back_populates="client")
     invoices = relationship("Invoice", back_populates="client", cascade="all, delete-orphan")
+    payments = relationship("Payment", foreign_keys="Payment.client_id", back_populates="client")
